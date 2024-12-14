@@ -1,0 +1,169 @@
+#include <vcl.h>
+#include "DataBase.h"
+#include <vector>
+
+#pragma hdrstop
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+
+TForm7 *Form7;
+//----------------------------------------------------------------------------
+
+// Реализация методов CarDatabase
+void CarDatabase::AddRecord(CarRecord record) {
+	records.push_back(record);
+}
+
+CarRecord* CarDatabase::GetRecordByID(String id) {
+	for (auto& record : records) {
+		if (record.ID == id) {
+			return &record;
+		}
+	}
+	return nullptr;
+}
+
+bool CarDatabase::RemoveRecordByID(String id) {
+	for (size_t i = 0; i < records.size(); ++i) {
+		if (records[i].ID == id) {
+			records.erase(records.begin() + i);
+			return true;
+		}
+	}
+	return false;
+}
+
+std::vector<CarRecord>& CarDatabase::GetAllRecords() {
+	return records;
+}
+
+// Реализация методов TForm7
+__fastcall TForm7::TForm7(TComponent* Owner)
+	: TForm(Owner) {
+	// Инициализация базы данных
+	database.AddRecord(CarRecord("1", "Vlad", "Petrov", "Ivanovich", "AE763PD", "+79119896732", "Honda"));
+	database.AddRecord(CarRecord("2", "Max", "Ivanov", "Alexeevich", "OL987C", "+79119896198", "Toyota"));
+	database.AddRecord(CarRecord("3", "Mikhail", "Sidorov", "Olegovich", "HJU619F", "+79119994762", "Priora"));
+
+	// Отображение данных
+	ShowDataBaseView();
+}
+
+void __fastcall TForm7::ShowDataBaseView() {
+	DataBase_Viev->Items->BeginUpdate();
+	DataBase_Viev->Items->Clear();
+
+	std::vector<CarRecord>& records = database.GetAllRecords();
+	for (const auto& record : records) {
+		TListItem* item = DataBase_Viev->Items->Add();
+        item->Caption = record.ID;
+        item->SubItems->Add(record.Name);
+        item->SubItems->Add(record.Surname);
+        item->SubItems->Add(record.CarNumber);
+        item->SubItems->Add(record.PhoneNumber);
+		item->SubItems->Add(record.CarModel);
+    }
+
+    DataBase_Viev->Items->EndUpdate();
+}
+
+void __fastcall TForm7::Button_AddDataClick(TObject *Sender) {
+	String id = Edit_NewID->Text;
+    String name = Edit_NewName->Text;
+	String surname = Edit_NewSurname->Text;
+    String patronymic = Edit_NewPatronymic->Text;
+    String carNumber = Edit_NewCarNumber->Text;
+    String phoneNumber = Edit_NewPhoneNumber->Text;
+    String carModel = Edit_NewCarModel->Text;
+
+	CarRecord newRecord(id, name, surname, patronymic, carNumber, phoneNumber, carModel);
+    database.AddRecord(newRecord);
+
+	ShowDataBaseView();
+}
+
+void __fastcall TForm7::Button_DeleteClick(TObject *Sender) {
+    String id = Edit_Delete->Text;
+    if (database.RemoveRecordByID(id)) {
+        ShowMessage("Запись с ID " + id + " успешно удалена.");
+    } else {
+        ShowMessage("Запись с ID " + id + " не найдена.");
+	}
+
+	ShowDataBaseView();
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm7::Edit_SearchEnter(TObject *Sender)
+{
+  if(Edit_Search->Text == "Номер(ID)/ФИО/Серийник/Телефон/модель"){
+	Edit_Search->Text="";
+	Edit_Search->Font->Color=clBlack;
+  }
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm7::Edit_SearchExit(TObject *Sender)
+{
+  if(Edit_Search->Text == ""){
+	Edit_Search->Text="Номер(ID)/ФИО/Серийник/Телефон/модель";
+	Edit_Search->Font->Color=clGray;
+  }
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm7::Button1ClickToShowPanel3(TObject *Sender)
+{
+Panel3->Visible = !Panel3->Visible;
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm7::Edit_DeleteEnter(TObject *Sender)
+{
+	  if(Edit_Delete->Text == "Порядковый номер(ID)"){
+	Edit_Delete->Text="";
+	Edit_Delete->Font->Color=clBlack;
+  }
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm7::Edit_DeleteExit(TObject *Sender)
+{
+	if(Edit_Delete->Text == ""){
+	Edit_Delete->Text="Порядковый номер(ID)";
+	Edit_Delete->Font->Color=clBlack;
+	}
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm7::Edit_ChangeEnter(TObject *Sender)
+{
+	if(Edit_Change->Text == "Номер(ID)"){
+	Edit_Change->Text="";
+	Edit_Change->Font->Color=clBlack;
+  }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm7::Edit_ChangeExit(TObject *Sender)
+{
+	if(Edit_Change->Text == ""){
+	Edit_Change->Text="Номер(ID)";
+	Edit_Change->Font->Color=clBlack;
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm7::Button4Click(TObject *Sender)
+{
+Panel4->Visible = !Panel4->Visible;
+Panel5->Visible = !Panel5->Visible;
+}
+//---------------------------------------------------------------------------
+void __fastcall TForm7::ButtonChangeConfirmClick(TObject *Sender)
+{
+   String ChangeText = Edit_Change->Text;
+  ShowMessage("Запись № " + ChangeText + " успешно изменина");
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm7::Button6Click(TObject *Sender)
+{
+  Panel5->Visible = !Panel5->Visible;
+}
+//---------------------------------------------------------------------------
+
